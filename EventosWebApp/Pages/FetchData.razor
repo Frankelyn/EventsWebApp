@@ -1,0 +1,61 @@
+﻿@page "/fetchdata"
+@using EventosWebApp.BLL;
+@using EventosWebApp.Models;
+@inject HttpClient Http
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (eventos == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id Evento</th>
+                <th>Evento</th>
+                <th>Descripcion</th>
+                <th>Fecha de inicio</th>
+                <th>Hora de inicio</th>
+                <th>Fecha de finalizacion</th>
+                <th>Hora de finalizacion</th>
+                <th>Capacidad de personas</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in eventos)
+            {
+                <tr>
+                    
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Evento>? eventos;
+    public EventoBLL contexto = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        eventos = await contexto.ObtenerEventos();
+    }
+
+    public class WeatherForecast
+    {
+        public DateTime Date { get; set; }
+
+        public int TemperatureC { get; set; }
+
+        public string? Summary { get; set; }
+
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+}
