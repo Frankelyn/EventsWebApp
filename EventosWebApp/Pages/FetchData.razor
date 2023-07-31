@@ -1,13 +1,13 @@
-﻿@page "/fetchdata"
-@using EventosWebApp.BLL;
-@using EventosWebApp.Models;
-@inject HttpClient Http
+﻿@page "/"
+@using EventosWebApp.BLL
+@using EventosWebApp.Models
+@using EventosWebApp.Pages
+@inject EventoBLL EventoBLL
+@inject NavigationManager NavigationManager
 
-<PageTitle>Weather forecast</PageTitle>
+<PageTitle>DashBoard</PageTitle>
 
-<h1>Weather forecast</h1>
-
-<p>This component demonstrates fetching data from the server.</p>
+<h1>DashBoard</h1>
 
 @if (eventos == null)
 {
@@ -18,44 +18,70 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Id Evento</th>
-                <th>Evento</th>
-                <th>Descripcion</th>
-                <th>Fecha de inicio</th>
-                <th>Hora de inicio</th>
-                <th>Fecha de finalizacion</th>
-                <th>Hora de finalizacion</th>
-                <th>Capacidad de personas</th>
+                <th>id_evento</th>
+                <th>nombre_evento</th>
+                <th>descripcion_evento</th>
+                <th>fecha_evento</th>
+                <th>hora_inicio</th>
+                <th>fecha_finalizacion</th>
+                <th>hora_finalizacion</th>
+                <th>capacidad_total</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in eventos)
+            @foreach (var evento in eventos)
             {
                 <tr>
-                    
+                    <td>@evento.id_evento</td>
+                    <td>@evento.nombre_evento</td>
+                    <td>@evento.descripcion_evento</td>
+                    <td>@evento.fecha_evento</td>
+                    <td>@evento.hora_inicio</td>
+                    <td>@evento.fecha_finalizacion</td>
+                    <td>@evento.hora_finalizacion</td>
+                    <td>@evento.capacidad_total</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="(() => VerSecciones(evento.id_evento))">Ver Secciones</button>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
 }
 
+@if (eventoSeleccionado != null)
+{
+    <h3>Evento Seleccionado:</h3>
+    <p>Id: @eventoSeleccionado.id_evento</p>
+    <p>Nombre: @eventoSeleccionado.nombre_evento</p>
+    <p>Descripción: @eventoSeleccionado.descripcion_evento</p>
+    <p>Fecha de inicio: @eventoSeleccionado.fecha_evento</p>
+    <p>Hora de inicio: @eventoSeleccionado.hora_inicio</p>
+    <p>Fecha de finalización: @eventoSeleccionado.fecha_finalizacion</p>
+    <p>Hora de finalización: @eventoSeleccionado.hora_finalizacion</p>
+    <p>Capacidad total: @eventoSeleccionado.capacidad_total</p>
+}
+
 @code {
-    private List<Evento>? eventos;
-    public EventoBLL contexto = new();
+    public List<Evento> eventos;
+    public Evento eventoSeleccionado;
+
+    //private int idEventoSeleccionado; // Variable de estado para almacenar el ID del evento seleccionado
 
     protected override async Task OnInitializedAsync()
     {
-        eventos = await contexto.ObtenerEventos();
+        eventos = await EventoBLL.ObtenerEventos();
     }
 
-    public class WeatherForecast
+    private void VerSecciones(int idEvento)
     {
-        public DateTime Date { get; set; }
-
-        public int TemperatureC { get; set; }
-
-        public string? Summary { get; set; }
-
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        SeccionBLL.setEventoId(idEvento); // Almacenar el ID del evento seleccionado en la variable de estado
+        NavigationManager.NavigateTo("/secciones"); // Navegar a la página de Secciones
     }
 }
+
+
+
+
+

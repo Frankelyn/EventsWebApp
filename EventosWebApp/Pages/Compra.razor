@@ -1,0 +1,120 @@
+﻿@using EventosWebApp.BLL
+@using EventosWebApp.Models
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@inject SeccionBLL SeccionBLL
+@inject NavigationManager NavigationManager
+
+@page "/compra"
+<h3>Compra</h3>
+
+@if (seccion == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h4>Sección: @seccion.nombre_seccion</h4>
+    <p>Capacidad de personas: @seccion.capacidad_seccion</p>
+    <p>Precio del Asiento: @seccion.precio_asiento</p>
+
+    <h5>Reserva de asientos</h5>
+    <p>Cantidad de asientos:</p>
+    <input type="number" @bind="cantidadAsientos" @oninput="ActualizarCantidadAsientos" />
+    <p>Cantidad en dinero: @CalcularCantidadDinero()</p>
+
+    <button class="btn btn-primary" @onclick="RealizarReserva">Realizar Reserva</button>
+
+    @if (exitoReserva)
+    {
+        <p class="text-success">Reserva exitosa.</p>
+    }
+
+    @if (errorReserva)
+    {
+        <p class="text-danger">No se pudo realizar la reserva. Inténtalo de nuevo.</p>
+    }
+}
+
+@code {
+    private Seccion seccion;
+    private int idSeccion;
+    private int cantidadAsientos;
+    private bool exitoReserva;
+    private bool errorReserva;
+
+    protected override async Task OnInitializedAsync()
+    {
+        idSeccion = GetIdSeccionFromUrl();
+        seccion = await SeccionBLL.BuscarSeccionPorId(idSeccion);
+    }
+
+    private int GetIdSeccionFromUrl()
+    {
+        // Obtener el ID de la sección desde la URL
+        var uri = new Uri(NavigationManager.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        if (query.ContainsKey("idSeccion"))
+        {
+            var idSeccionString = query["idSeccion"];
+            if (int.TryParse(idSeccionString, out int id))
+            {
+                return id;
+            }
+        }
+        return 0; // ID de sección inválido
+    }
+
+    private decimal CalcularCantidadDinero()
+    {
+        // Calcular la cantidad en dinero basada en la cantidad de asientos y el precio del asiento
+        return cantidadAsientos * seccion.precio_asiento;
+    }
+
+    private void ActualizarCantidadAsientos(ChangeEventArgs e)
+    {
+        // Validar y actualizar la cantidad de asientos en tiempo real
+        if (int.TryParse(e.Value.ToString(), out int cantidad) && cantidad >= 0)
+        {
+            cantidadAsientos = cantidad;
+        }
+        else
+        {
+            cantidadAsientos = 0;
+        }
+    }
+
+    private async Task RealizarReserva(MouseEventArgs e)
+    {
+        if (cantidadAsientos > 0 && cantidadAsientos <= seccion.capacidad_seccion)
+        {
+            // Actualizar la capacidad de personas de la sección después de la reserva
+            seccion.capacidad_seccion -= cantidadAsientos;
+            bool actualizacionExitosa = await SeccionBLL.ActualizarSeccion(seccion);
+
+            if (actualizacionExitosa)
+            {
+                exitoReserva = true;
+                errorReserva = false;
+
+                // La actualización se realizó correctamente, realizar otras acciones si es necesario
+                // Redireccionar a otra página, mostrar un mensaje de éxito, etc.
+            }
+            else
+            {
+                exitoReserva = false;
+                errorReserva = true;
+
+                // La actualización no se pudo realizar, mostrar un mensaje de error
+            }
+        }
+        else
+        {
+            exitoReserva = false;
+            errorReserva = true;
+
+            // Mostrar un mensaje de error o validación si la cantidad de asientos es inválida
+        }
+    }
+}
+

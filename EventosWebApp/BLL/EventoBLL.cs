@@ -6,19 +6,26 @@ namespace EventosWebApp.BLL
 {
     public class EventoBLL
     {
-        public ApiClient apiClient = new ApiClient();
+        public ApiClient apiClient;
+        public SeccionBLL seccionBLL;
+
+        public EventoBLL()
+        {
+            apiClient = new ApiClient();
+        }
+
+
 
         public async Task<List<Evento>> ObtenerEventos()
         {
-            
             try
             {
-                HttpResponseMessage response = await apiClient.GetAsync("eventos/");
+                var response = await apiClient.GetAsync("eventos/");
 
                 if (response.IsSuccessStatusCode)
                 {
                     string eventosJson = await response.Content.ReadAsStringAsync();
-                    List<Evento>? eventos = JsonConvert.DeserializeObject<List<Evento>>(eventosJson);
+                    List<Evento> eventos = JsonConvert.DeserializeObject<List<Evento>>(eventosJson);
                     return eventos;
                 }
                 else
@@ -32,6 +39,16 @@ namespace EventosWebApp.BLL
                 return null;
             }
         }
+
+
+        
+
+
+
+
+
+
+
 
         public async Task<bool> ModificarEventos(Evento evento, List<Seccion> secciones)
         {

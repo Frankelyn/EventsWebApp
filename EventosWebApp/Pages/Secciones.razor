@@ -1,0 +1,94 @@
+﻿
+@using EventosWebApp.BLL
+@using EventosWebApp.Models
+@inject EventoBLL EventoBLL
+@inject SeccionBLL SeccionBLL
+@inject NavigationManager NavigationManager
+
+
+@page "/secciones"
+<PageTitle>Secciones</PageTitle>
+
+<h1>Secciones</h1>
+
+
+@if (seccioneslist == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id Seccion</th>
+                <th>Nombre Seccion</th>
+                <th>Capacidad de personas</th>
+                <th>Precio del Asiento</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var seccion in seccioneslist)
+            {
+                <tr>
+                    <td>@seccion.id_seccion</td>
+                    <td>@seccion.nombre_seccion</td>
+                    <td>
+                        @if (seccion.capacidad_seccion > 0)
+                        {
+                            @seccion.capacidad_seccion
+                        }
+                        else
+                        {
+                            <span style="color: red;">Llena</span>
+                        }
+                    </td>
+                    <td>@seccion.precio_asiento</td>
+                    <td>
+                        @if (seccion.capacidad_seccion > 0)
+                        {
+                            <button class="btn btn-primary" @onclick="(() => ReservarSeccion(seccion.id_seccion))">Reservar</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-danger" disabled>Sección llena</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Seccion> seccioneslist;
+    private List<Seccion> secciones;
+
+    public int idEvento = SeccionBLL.getEventoId();
+
+     
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        secciones = await SeccionBLL.ObtenerSecciones();
+        seccioneslist =  SeccionBLL.SeccionesPorEvento(secciones,idEvento);
+
+    }
+
+    private void ReservarSeccion(int idSeccion)
+    {
+        // Navegar a la página de compra y pasar el ID de la sección
+        NavigationManager.NavigateTo($"/compra?idSeccion={idSeccion}");
+    }
+}
+
+

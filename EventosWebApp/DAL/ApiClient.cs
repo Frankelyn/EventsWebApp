@@ -7,13 +7,20 @@ namespace EventosWebApp.DAL
     public class ApiClient
     {
         private HttpClient httpClient = new HttpClient();
-        public string? baseURL = "http://127.0.0.1:8000/"; //URL de la API
+        public string baseURL = "http://localhost:8000/"; //URL de la API
 
         public async Task<HttpResponseMessage> GetAsync(string endpoint)
         {
             string url = baseURL + endpoint;
             return await httpClient.GetAsync(url);
         }
+
+        public async Task<HttpResponseMessage> GetByIdAsync(string endpoint, int id)
+        {
+            string url = baseURL + $"{endpoint}/{id}";
+            return await httpClient.GetAsync(url);
+        }
+
 
         public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T data)
         {
